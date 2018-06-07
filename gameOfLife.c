@@ -38,10 +38,14 @@ int main(int argc, char **argv)
     //printGrid(grid, n, 0);
     double totalTime = 0;
 
+    #pragma omp parallel
+    {
+
     for(int gen = 0; gen < numGenerations; gen++)
     {
     
         //Clear buffer
+        #pragma omp single
         for(int i = 0; i < n; i++)
         {
             for(int j = 0; j < n; j++)
@@ -49,6 +53,7 @@ int main(int argc, char **argv)
                 buffer[i][j] = 0;
             }
         }
+        #pragma omp barrier
 
     //Loop over entire grid
     double startTime = omp_get_wtime();
@@ -85,16 +90,21 @@ int main(int argc, char **argv)
         }
     }
     //Swap pointers
+    #pragma omp single
+    {
     int **temp = grid;
     grid = buffer;
     buffer = temp;
+    }
     double endTime = omp_get_wtime();
 
     totalTime += endTime - startTime;
-
+    
+    #pragma omp barrier
     //printGrid(grid, n, gen+1);
 
     }//end of generation loop
+    }
     printf("Total Time: %.4f\n", totalTime);
 }
 
